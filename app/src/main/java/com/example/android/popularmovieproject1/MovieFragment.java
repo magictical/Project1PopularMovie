@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -23,12 +24,8 @@ public class MovieFragment extends Fragment {
 
     //dummy data
     MoviePoster[] moviePosters = {
-            new MoviePoster("Batman vs Superman", R.drawable.batsuper),
-            new MoviePoster("Hunger Game", R.drawable.hungergame),
-            new MoviePoster("StarWars", R.drawable.starwars),
             new MoviePoster("bus657", R.drawable.bus657),
             new MoviePoster("cicvilwar", R.drawable.civilwar),
-            new MoviePoster("deadpool", R.drawable.deadpool),
             new MoviePoster("hungergame2", R.drawable.hungergame2),
             new MoviePoster("interstellar", R.drawable.interstellar),
             new MoviePoster("madmax", R.drawable.madmax),
@@ -61,16 +58,18 @@ public class MovieFragment extends Fragment {
         outState.putParcelableArrayList("saveposter", moviePosterList);
         super.onSaveInstanceState(outState);
     }
-/*asdasdasdasdasd*/
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
 
         View rootView = inflater.inflate(R.layout.moviefragment_main,container, false );
         postAdapter = new PostAdapter(getActivity(), moviePosterList);
 
         //inflate data based on preferred Adapter
-        ListView listView = (ListView) rootView.findViewById(R.id.listview_moviefragment);
-        listView.setAdapter(postAdapter);
+        GridView gridView = (GridView) rootView.findViewById(R.id.gridview_moviefragment);
+        gridView.setAdapter(postAdapter);
 
         return rootView;
     }
