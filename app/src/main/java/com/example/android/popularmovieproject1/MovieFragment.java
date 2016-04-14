@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
-import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,45 +22,50 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by MD on 2016-03-31.
  */
 public class MovieFragment extends Fragment {
-    //the Adapter for storing moviePosterList
-    private  PostAdapter postAdapter;
 
-    //the ArrayList for storing moviePoster
-    private ArrayList<MoviePoster> moviePosterList;
+    //the Adapter for storing moviePosterList
+    private MovieAdapter movieAdapter;
+
+    //the ArrayList for storing movieInfo
+    List<MovieInfo> movieInfoList = new ArrayList<>();
+
+    //Instance for saving Bundle
+    ArrayList<MovieInfo> saveMovieInfoList;
+
 
     //dummy data
-    MoviePoster[] moviePosters = {
-            new MoviePoster("bus657", R.drawable.bus657),
-            new MoviePoster("cicvilwar", R.drawable.civilwar),
-            new MoviePoster("hungergame2", R.drawable.hungergame2),
-            new MoviePoster("interstellar", R.drawable.interstellar),
-            new MoviePoster("madmax", R.drawable.madmax),
-            new MoviePoster("minions", R.drawable.minions),
-            new MoviePoster("revernant", R.drawable.revernant),
-            new MoviePoster("spector", R.drawable.spector),
-            new MoviePoster("terminator", R.drawable.terminator)
-    };
+    /*MovieInfo[] moviePosters = {
+            *//*new MovieInfo("bus657", R.drawable.bus657),
+            new MovieInfo("cicvilwar", R.drawable.civilwar),
+            new MovieInfo("hungergame2", R.drawable.hungergame2),
+            new MovieInfo("interstellar", R.drawable.interstellar),
+            new MovieInfo("madmax", R.drawable.madmax),
+            new MovieInfo("minions", R.drawable.minions),
+            new MovieInfo("revernant", R.drawable.revernant),
+            new MovieInfo("spector", R.drawable.spector),
+            new MovieInfo("terminator", R.drawable.terminator)*//*
+    };*/
 
 
 
 
-
+    //종류별로 저장해야될것 같은데 확인해야함!!
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         //preventing data loss from device rotation.
-        if(savedInstanceState == null || !savedInstanceState.containsKey("saveposter")) {
-            //if ArrayList<MoviePoster> is not exist, make new object for it.
-            moviePosterList = new ArrayList<MoviePoster>(Arrays.asList(moviePosters));
+        if(savedInstanceState == null || !savedInstanceState.containsKey(getString(R.string.key_save_data))) {
+            //if ArrayList<MovieInfo> is not exist, make new object for it.
+            saveMovieInfoList = new ArrayList<MovieInfo>((movieInfoList));
         } else {
-            moviePosterList = savedInstanceState.getParcelableArrayList("saveposter");
+            saveMovieInfoList = savedInstanceState.getParcelableArrayList(getString(R.string.key_save_data));
         }
 
         FetchMovieData fetchMovieData = new FetchMovieData();
@@ -71,7 +75,8 @@ public class MovieFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         //the preserved value will be put on based on its key.
-        outState.putParcelableArrayList("saveposter", moviePosterList);
+        //ParcelableArrayList에 맞게 유형을 맞춰서 사용해야함 e.g : saveMovieInfoList는 arraylist 임
+        outState.putParcelableArrayList(getString(R.string.key_save_data), saveMovieInfoList);
         super.onSaveInstanceState(outState);
     }
 
@@ -81,32 +86,24 @@ public class MovieFragment extends Fragment {
 
 
         View rootView = inflater.inflate(R.layout.moviefragment_main,container, false );
-        postAdapter = new PostAdapter(getActivity(), moviePosterList);
+        movieAdapter = new MovieAdapter(getActivity(), movieInfoList);
 
         //inflate data based on preferred Adapter
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview_moviefragment);
-        gridView.setAdapter(postAdapter);
+        gridView.setAdapter(movieAdapter);
 
         return rootView;
     }
 
-    /*AsyncTask를 실행할 메소드 필요
-    * background에서 picasso가 이미지를 처리할 수 있는 코드 작성*/
-
-    //Async 하위의 background 스레드를 실행하고 해당 데이터를 가져올 내부클래스 생성
-
     //for using internet connection, use AsyncTask
-    //this class will get the data from JSON on main thread and get internet connection on background thread
-    public class FetchMovieData extends AsyncTask<String, Void, String[]> {
+    //this class will get the data from JSON on UI thread
+    //and get internet connection on background thread
+    public class FetchMovieData extends AsyncTask<String, Void, List<MovieInfo>> {
         private final String LOG_TAG = FetchMovieData.class.getSimpleName();
 
-        /*사용자 편의에 맞게 데이터가 읽기 쉽게 변환할 메소드(필요할경우)
-        e.g: 화씨 썹씨로 바꾸는 Math.round 고려해봐야함
-        private void changeFormat(){}*/
-
-
-        //get an argument from api and use the parameter to extract the data that need.
-        private String[] getMovieDataFromJson(String movieInfoStr)
+        //get an argument from api and use the parameter to extract the data that is needed.
+        //doInBackground가 먼저인지 이게 먼저인지? 멀티스레드니 동시인가?
+        private List<MovieInfo> getMovieDataFromJson(String movieInfoStr)
                 throws JSONException{
             //the name of the JSON object that need to be extracted.
             final String RESULT_LIST = "results";
@@ -123,48 +120,61 @@ public class MovieFragment extends Fragment {
             //get a JSON Array
             JSONArray movieArray = movieJson.getJSONArray(RESULT_LIST);
 
+
             //just checking for how many list from JSONArray
             int howlong = movieArray.length();
             Log.v(LOG_TAG, "how long" + howlong);
 
             //in this project, 20 lists are enough.
-            // don't need to consider the endless scrollview which is quite interesting.
+            //don't need to consider the endless scrollview which is quite interesting.
             //about EndlessScrollview
             // : https://github.com/codepath/android_guides/wiki/Endless-Scrolling-with-AdapterViews
-            String[] resultStrs = new String[movieArray.length()];
-            for(int i = 0; i < movieArray.length(); i++) {
-                String poster_path;
-                String overview;
-                String release_date;
-                String title;
-                String vote_average;
 
+
+
+            //create MovieInfo Object to save string in JSONArray
+            movieInfoList = new ArrayList<>();
+
+            for(int i = 0; i < movieArray.length(); i++) {
 
                 //get a JSON abject data from movieArray(JSONArray)
-                JSONObject movieInfo = movieArray.getJSONObject(i);
+                JSONObject movieUrlPath = movieArray.getJSONObject(i);
+                JSONObject movieOverView = movieArray.getJSONObject(i);
+                JSONObject movieReleaseDate = movieArray.getJSONObject(i);
+                JSONObject movieTitle = movieArray.getJSONObject(i);
+                JSONObject movieVoteAverage = movieArray.getJSONObject(i);
+
+
+
+                MovieInfo movieInfo = new MovieInfo();
 
                 //get a string value from JSONobject
-                poster_path = movieInfo.getString(SEARCH_POSTER_PATH);
-                resultStrs[i] = "http://image.tmdb.org/t/p/w185" + poster_path;
+                movieInfo.setPosterPath(movieUrlPath.getString(SEARCH_POSTER_PATH));
+                movieInfo.setOverView(movieOverView.getString(SEARCH_OVERVIEW));
+                movieInfo.setReleaseDate(movieReleaseDate.getString(SEARCH_RELEASE_DATE));
+                movieInfo.setTitle(movieTitle.getString(SEARCH_TITLE));
+                movieInfo.setVoteAverage(movieVoteAverage.getString(SEARCH_VOTE));
+
+                Log.v(LOG_TAG, "path is : " + movieInfo.getPosterPath()
+                        + "overview is : " + movieInfo.getOverView()
+                        + "release date is " + movieInfo.getReleaseDate()
+                        + " title is " + movieInfo.getTitle()
+                        + "vote is "  + movieInfo.getVoteAverage()
+                );
+                movieInfoList.add(movieInfo);
             }
 
-            for (String  s : resultStrs) {
-                Log.v(LOG_TAG, "Movie Info entry" + s);
-            }
-            return resultStrs;
+            return movieInfoList;
         }
 
         @Override
-        protected String[] doInBackground(String... params) {
-            //나중에 fetchMovieData에서 받을 param weather 앱에서는 위치값은 q의 값을 받았었음 필요하면 구현
-            /*if (params.length ==0) {
-                return null;
-            }*/
+        protected List<MovieInfo> doInBackground(String... params) {
+
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
-            //a instance to put a data from JSON
+            //a instance put the string from JSON
             String movieInfoStr = null;
             String sortingType = "popularity.desc";
 
@@ -216,7 +226,8 @@ public class MovieFragment extends Fragment {
                     return null;
                 }
                 movieInfoStr = buffer.toString();
-                Log.v(LOG_TAG, " movieInfo string " + movieInfoStr);
+                /*Log.v(LOG_TAG, " movieInfo string " + movieInfoStr);*/
+
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error", e);
                 //ended the parsing
@@ -244,12 +255,17 @@ public class MovieFragment extends Fragment {
             return null;
         }
 
-        /*@Override
-        protected void onPostExcute(String[] result) {
+        @Override
+        protected void onPostExecute(List<MovieInfo> result) {
 
+            super.onPostExecute(result);
+
+            if(result != null) {
+                movieAdapter.clear();
+                movieAdapter.addAll(result);
             }
 
-        }*/
+        }
     }
 
 }

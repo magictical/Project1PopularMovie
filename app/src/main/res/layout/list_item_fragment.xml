@@ -1,26 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical">-->
 
-    <ImageView
+    <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/list_item_poster_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
+    >
     </ImageView>
 
-<!--gravity="center" : align the object's location not layout -->
+    <!--gravity="center" : align the object's location not layout
     <TextView
         android:id="@+id/list_item_poster_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="noname"
-        android:textSize="12dp"/>
+        android:textSize="12dp"/>-->
 
 
 
-</LinearLayout>
+<!--</LinearLayout>-->
