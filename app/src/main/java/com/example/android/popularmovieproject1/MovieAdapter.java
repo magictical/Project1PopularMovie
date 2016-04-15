@@ -31,17 +31,21 @@ public class MovieAdapter extends ArrayAdapter<MovieInfo> {
 
     /*custom adapter를 사용할 경우 반드시 getView Override 해줘야함*/
 
-   //순서좀 알자 클래스가 호출(오브젝트 생성되면) 메소드가 호출되고 실행되는게 맞나 영어로 적절한 단어는?
+    //순서좀 알자 클래스가 호출(오브젝트 생성되면) 메소드가 호출되고 실행되는게 맞나 영어로 적절한 단어는?
+    // answer : when class is invoked, it construct the object and instantiate everything in it
+    // and ready for the system
 
     @Override
-    //인자를 context로 부터 받는게 맞는가?
+    //those arguments are coming from context? - yes
+    //position : the number at view kind of tag for each view
+    //view : individual view at ViewGroup - at here it's each poster
+    //ViewGroup : bunch of view - GridView
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         ViewHolder holder = null;
 
         if (view == null) {
-            //접근자가 어떻게 되는지 어떻게 읽어 들이는지 잘모르겠음
-            //파라미터도 물어봐야할듯
+
             view = LayoutInflater.from(getContext()).inflate(R.layout.list_item_fragment, parent, false);
 
 
@@ -53,8 +57,9 @@ public class MovieAdapter extends ArrayAdapter<MovieInfo> {
                 //기존 view가 있을경우 getTag로 불러옴
                 holder = (ViewHolder) view.getTag();
             }
-        //position이 어떤식으로 쓰이는가?갈피를 못잡겠음
+        //give a number tag at movieInfoList's object : in this case gives number tag to movieposter's path
         MovieInfo setOfData = movieInfoList.get(position);
+        //get the poster path based on position at setOfData
         Picasso.with(getContext()).load("http://image.tmdb.org/t/p/w185" + setOfData.getPosterPath())
                 .into(holder.posterHolder);
 

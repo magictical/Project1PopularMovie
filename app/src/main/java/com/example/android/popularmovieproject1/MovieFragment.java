@@ -69,6 +69,7 @@ public class MovieFragment extends Fragment {
         }
 
         FetchMovieData fetchMovieData = new FetchMovieData();
+        //this will launch the doInBackground()
         fetchMovieData.execute();
     }
 
@@ -79,7 +80,9 @@ public class MovieFragment extends Fragment {
         outState.putParcelableArrayList(getString(R.string.key_save_data), saveMovieInfoList);
         super.onSaveInstanceState(outState);
     }
-
+    //every argument LayoutInflater, ViewGroup, Bundle are coming from Context
+    // when system Overrride method. Overrride triggers taking automatic tools supplied by SDK and
+    //modify components to our specific application.
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -96,13 +99,14 @@ public class MovieFragment extends Fragment {
     }
 
     //for using internet connection, use AsyncTask
-    //this class will get the data from JSON on UI thread
-    //and get internet connection on background thread
+    //this class will get  url connection and  the JSON string from background thread and
+    // JSON string pass to UI thread which is getMovieDataFromJson
     public class FetchMovieData extends AsyncTask<String, Void, List<MovieInfo>> {
+
         private final String LOG_TAG = FetchMovieData.class.getSimpleName();
 
         //get an argument from api and use the parameter to extract the data that is needed.
-        //doInBackground가 먼저인지 이게 먼저인지? 멀티스레드니 동시인가?
+        //this will callback by doInBackground at first catch block
         private List<MovieInfo> getMovieDataFromJson(String movieInfoStr)
                 throws JSONException{
             //the name of the JSON object that need to be extracted.
@@ -122,8 +126,8 @@ public class MovieFragment extends Fragment {
 
 
             //just checking for how many list from JSONArray
-            int howlong = movieArray.length();
-            Log.v(LOG_TAG, "how long" + howlong);
+            int howLong = movieArray.length();
+            Log.v(LOG_TAG, "how long" + howLong);
 
             //in this project, 20 lists are enough.
             //don't need to consider the endless scrollview which is quite interesting.
