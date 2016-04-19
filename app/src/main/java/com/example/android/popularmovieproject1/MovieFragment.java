@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
@@ -60,6 +63,8 @@ public class MovieFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        //notifying that fragment has item to add on menu bar
+        /*setHasOptionsMenu(true);*/
         //preventing data loss from device rotation.
         if(savedInstanceState == null || !savedInstanceState.containsKey(getString(R.string.key_save_data))) {
             //if ArrayList<MovieInfo> is not exist, make new object for it.
@@ -72,6 +77,21 @@ public class MovieFragment extends Fragment {
         //this will launch the doInBackground()
         fetchMovieData.execute();
     }
+    /*@Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == R.id.action_settings) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }*/
+
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
