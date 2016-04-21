@@ -2,6 +2,7 @@
     <string name="app_name">PopularMovieProject1</string>
     <string name="key_save_data">SaveMovieData</string>
     <string name="action_settings">Settings</string>
-    <string name="sorting_out_movie">SortBy</string>
+    <string name="sort_by_rating">Rating</string>
+    <string name="sort_by_pop">Popularity</string>
     <string name="title_activity_movie_detail">MovieDetailActivity</string>
 </resources>

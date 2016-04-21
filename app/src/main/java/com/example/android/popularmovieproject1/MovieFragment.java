@@ -1,6 +1,7 @@
 package com.example.android.popularmovieproject1;
 
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.json.JSONArray;
@@ -26,11 +28,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.Inflater;
 
 /**
  * Created by MD on 2016-03-31.
  */
 public class MovieFragment extends Fragment {
+    private final String LOG_TAG = MovieFragment.class.getSimpleName();
 
     //the Adapter for storing moviePosterList
     private MovieAdapter movieAdapter;
@@ -63,8 +67,8 @@ public class MovieFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        //notifying that fragment has item to add on menu bar
-        /*setHasOptionsMenu(true);*/
+        //notifying that fragment will use option menu item.
+        setHasOptionsMenu(true);
         //preventing data loss from device rotation.
         if(savedInstanceState == null || !savedInstanceState.containsKey(getString(R.string.key_save_data))) {
             //if ArrayList<MovieInfo> is not exist, make new object for it.
@@ -72,10 +76,10 @@ public class MovieFragment extends Fragment {
         } else {
             saveMovieInfoList = savedInstanceState.getParcelableArrayList(getString(R.string.key_save_data));
         }
-
-        FetchMovieData fetchMovieData = new FetchMovieData();
+        /*sortOutMovie("popularity.desc");*/
+        /*FetchMovieData fetchMovieData = new FetchMovieData();
         //this will launch the doInBackground()
-        fetchMovieData.execute();
+        fetchMovieData.execute();*/
     }
     /*@Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -90,6 +94,38 @@ public class MovieFragment extends Fragment {
         }
         return super.onOptionsItemSelected(item);
     }*/
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.menu_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_sort_pop) {
+            sortOutMovie("popularity.desc");
+            return true;
+        }
+
+        if (id == R.id.action_sort_rating) {
+            sortOutMovie("vote_average.desc");
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void sortOutMovie(String params) {
+        FetchMovieData sortOut = new FetchMovieData();
+        sortOut.execute(params);
+    }
 
 
 
@@ -115,7 +151,36 @@ public class MovieFragment extends Fragment {
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview_moviefragment);
         gridView.setAdapter(movieAdapter);
 
+        //add explicit intent
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //객체에 position넣어서 따로 Extra로 보내지말고 list자체를 extra로 보낼수는 없나?
+                //그런데 좀 생각해보면 어차피 메인은 MainActivity이고 특정 값만 인텐트를 통해서
+                //보내려는 것이기 때문에 전부보내기 보다는 필요한것만 전달해 주는게 더 나은것 같기도 하다.
+                MovieInfo mvData = movieAdapter.getItem(position);
+
+
+                Log.v(LOG_TAG, "what's in Intent(data)" + mvData);
+
+                Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
+                        .putExtra("title", mvData.getTitle())
+                        .putExtra("poster", mvData.getPosterPath())
+                        .putExtra("overView", mvData.getOverView())
+                        .putExtra("releaseDate", mvData.getReleaseDate())
+                        .putExtra("voteAverage", mvData.getVoteAverage());
+
+                startActivity(intent);
+            }
+        });
+
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        sortOutMovie("popularity.desc");
     }
 
     //for using internet connection, use AsyncTask
@@ -124,6 +189,8 @@ public class MovieFragment extends Fragment {
     public class FetchMovieData extends AsyncTask<String, Void, List<MovieInfo>> {
 
         private final String LOG_TAG = FetchMovieData.class.getSimpleName();
+
+
 
         //get an argument from api and use the parameter to extract the data that is needed.
         //this will callback by doInBackground at first catch block
@@ -200,8 +267,6 @@ public class MovieFragment extends Fragment {
 
             //a instance put the string from JSON
             String movieInfoStr = null;
-            String sortingType = "popularity.desc";
-
 
             try{
                 //Construct the URL for the OpenWeatherMap query
@@ -211,7 +276,7 @@ public class MovieFragment extends Fragment {
                 final String APPID_PRAM = "api_key";
 
                 Uri builtUri = Uri.parse(MOVIE_ORG_BASE_URL).buildUpon()
-                        .appendQueryParameter(SORTING_PARAM,sortingType)
+                        .appendQueryParameter(SORTING_PARAM,params[0])
                         .appendQueryParameter(APPID_PRAM,BuildConfig.API_KEY_FOR_MOVIE_ORG)
                         .build();
 
