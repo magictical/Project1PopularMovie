@@ -1,8 +1,32 @@
 <resources>
+    <!--Label for App's name on Actionbar-->
     <string name="app_name">PopularMovieProject1</string>
+    <!--Label for saveInstance-->
     <string name="key_save_data">SaveMovieData</string>
-    <string name="action_settings">Settings</string>
+    <!--Label for menu-->
+    <string name="search_option">Search Option</string>
     <string name="sort_by_rating">Rating</string>
     <string name="sort_by_pop">Popularity</string>
+
+    <!--Preference label for Search movie-->
+    <string name="pref_label_search_movie">Search Movie</string>
+    <!--Preference key for search-->
+    <string name="pref_key_search_movie">pref_search</string>
+
+
+    <!--Preference label for pref search option-->
+    <string name="pref_label_search_pop">POPULARITY</string>
+    <string name="pref_label_search_rating">RATING</string>
+    <!--Preference label for pref search value-->
+    <string name="pref_value_pop">pop</string>
+    <string name="pref_value_rating">rating</string>
+
+
+
+
+
+
+    <!--name for Activity on actionbar-->
     <string name="title_activity_movie_detail">MovieDetailActivity</string>
+    <string name="title_activity_setting">SettingActivity</string>
 </resources>

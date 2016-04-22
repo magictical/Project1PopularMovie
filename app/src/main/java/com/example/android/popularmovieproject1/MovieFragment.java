@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -98,7 +99,10 @@ public class MovieFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.menu_main, menu);
+        /*inflater.inflate(R.menu.menu_main, menu);*/
+
+        inflater.inflate(R.menu.menu_search_movie, menu);
+
     }
 
     @Override
@@ -109,7 +113,7 @@ public class MovieFragment extends Fragment {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_sort_pop) {
+        /*if (id == R.id.action_sort_pop) {
             sortOutMovie("popularity.desc");
             return true;
         }
@@ -117,14 +121,54 @@ public class MovieFragment extends Fragment {
         if (id == R.id.action_sort_rating) {
             sortOutMovie("vote_average.desc");
             return true;
+        }*/
+
+        if (id == R.id.action_search_movie) {
+            //Megan - why can't i use this at (new Intent(this, SettingActivity.class)
+            //fragment doesn't have Activity context? while Activity has it?
+            startActivity(new Intent(getActivity(), SettingActivity.class));
+
+            return false;
         }
 
+        //Megan - this will execute the method in fragment java not my method at here(am i right?)
+        //and return false
         return super.onOptionsItemSelected(item);
     }
 
-    public void sortOutMovie(String params) {
+    public void sortOutMovie() {
         FetchMovieData sortOut = new FetchMovieData();
-        sortOut.execute(params);
+        String search_Option = PreferenceManager.getDefaultSharedPreferences(getContext())
+                .getString(getString(R.string.pref_key_search_movie), getString(R.string.pref_value_pop));
+
+        String convertToApiUrl;
+        //==이랑 equal이랑 헷갈리지 말자
+        //== : comparing reference between object.
+        //equals : comparing value between object.
+        //Megan - instance search_Option is String type and has "pop" as value
+        //so i think it's possible to compare it with below code
+        // if(search_Option == getString(R.string.pref_value_pop))
+        //i know that == mean comparing the object's reference and equals comparing value itself.
+        if (search_Option.equals(getString(R.string.pref_value_pop))) {
+            convertToApiUrl = "popularity.desc";
+            sortOut.execute(convertToApiUrl);
+        }
+        if (search_Option.equals(getString(R.string.pref_value_rating))) {
+            convertToApiUrl = "vote_average.desc";
+            sortOut.execute(convertToApiUrl);
+        }
+
+        Log.v(LOG_TAG, "see sortout String : " + search_Option);
+
+
+        /*if(search_Option == getString(R.string.pref_value_pop)) {
+            sortOut.execute("popularity.desc");
+        }
+        else if(search_Option == getString(R.string.pref_value_rating)) {
+            sortOut.execute("vote_average.desc");
+        } else {
+            sortOut.execute("popularity.desc");
+        }*/
     }
 
 
@@ -180,7 +224,7 @@ public class MovieFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        sortOutMovie("popularity.desc");
+        sortOutMovie();
     }
 
     //for using internet connection, use AsyncTask
@@ -214,7 +258,7 @@ public class MovieFragment extends Fragment {
 
             //just checking for how many list from JSONArray
             int howLong = movieArray.length();
-            Log.v(LOG_TAG, "how long" + howLong);
+            /*Log.v(LOG_TAG, "how long" + howLong);*/
 
             //in this project, 20 lists are enough.
             //don't need to consider the endless scrollview which is quite interesting.
@@ -246,12 +290,12 @@ public class MovieFragment extends Fragment {
                 movieInfo.setTitle(movieTitle.getString(SEARCH_TITLE));
                 movieInfo.setVoteAverage(movieVoteAverage.getString(SEARCH_VOTE));
 
-                Log.v(LOG_TAG, "path is : " + movieInfo.getPosterPath()
+                /*Log.v(LOG_TAG, "path is : " + movieInfo.getPosterPath()
                         + "overview is : " + movieInfo.getOverView()
                         + "release date is " + movieInfo.getReleaseDate()
                         + " title is " + movieInfo.getTitle()
                         + "vote is "  + movieInfo.getVoteAverage()
-                );
+                );*/
                 movieInfoList.add(movieInfo);
             }
 
@@ -307,7 +351,8 @@ public class MovieFragment extends Fragment {
                     //there is data length limit when you see the ADM manager
                     //in this case even though the data sent successfully
                     //you can't check the full string from Log.v which is alright.
-                    Log.v(LOG_TAG, "let's see : " + buffer);
+
+                    /*Log.v(LOG_TAG, "let's see : " + buffer);*/
                 }
 
                 if (buffer.length() == 0) {
